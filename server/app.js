@@ -2,6 +2,19 @@ const querystring = require('querystring')
 const handleBlogRouter = require('./src/router/blog')
 const handleUserRouter = require('./src/router/user')
 
+const getPostData = (res) => {
+  const promise = new Promise((resolve, reject) => {
+    if (req.method !== 'POST') {
+      return resolve({})
+    }
+
+    if (req.headers['content-type'] !== 'application/json') {
+      return resolve({})
+    }
+  })
+  return promise
+}
+
 const serverHandle = (req, res) => {
   res.setHeader('Content-type', 'application/json')
 
