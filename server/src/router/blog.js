@@ -1,4 +1,4 @@
-const { getList } = require('./../controller/blog')
+const { getList, getDetail, newBlog, updateBlog, delBlog } = require('./../controller/blog')
 const { SuccessModel, ErrorModel } = require('../model/resModel')
 
 const handleBlogRouter = (req, res) => {
@@ -12,7 +12,7 @@ const handleBlogRouter = (req, res) => {
         msg = new SuccessModel(getList(req.query.author))
         break
       case '/api/blog/detail' :
-        msg = '获取详情'
+        msg = new SuccessModel(getDetail(req.query.author))
         break  
     }
     return msg
@@ -21,13 +21,23 @@ const handleBlogRouter = (req, res) => {
     let msg
     switch(req.path) {
       case '/api/blog/new' :
-        msg = '新建接口'
+        msg = new SuccessModel(newBlog(req.body))
         break
-      case '/api/blog/update' :
-        msg = '更新接口'
+      case '/api/blog/update':
+        const data = updateBlog(req.body)
+        if (data) {
+          msg = new SuccessModel(data)
+        } else {
+          msg = new ErrorModel(data)
+        }
         break  
-      case '/api/blog/delete' :
-        msg = '删除接口'
+      case '/api/blog/delete':
+          const data = delBlog(req.body)
+          if (data) {
+            msg = new SuccessModel(data)
+          } else {
+            msg = new ErrorModel(data)
+          }
         break  
     }
     return msg
