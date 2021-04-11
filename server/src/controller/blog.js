@@ -1,24 +1,17 @@
+const { exec } = require('../db/mysql')
+
 const getList = (author, keyword) => {
-  return [
-    {
-      id: 1,
-      title: 'title',
-      content: 'content',
-      createTime: 123123,
-      author: author
-    }
-  ]
+  let sql = 'select * from blog where 1=1'
+  author && (sql += ` and author = '${author}'`)
+  keyword && (sql += ` and title like '%${keyword}%'`)
+  sql += ' order by createtime desc;'
+  return exec(sql)
 }
-const getDetail = (author, keyword) => {
-  return [
-    {
-      id: 1,
-      title: 'title',
-      content: 'content',
-      createTime: 123123,
-      author: author
-    }
-  ]
+const getDetail = (id) => {
+  const sql = `select * from blog where id = '${id}'`
+  return exec(sql).then(rows => {
+    return rows[0]
+  })
 }
 
 const newBlog = (blogData = {}) => {
