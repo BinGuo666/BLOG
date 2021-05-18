@@ -34,17 +34,30 @@ const getPostData = (req) => {
 
 const serverHandle = (req, res) => {
   // 请求返回首页
-  if (req.path='/' && req.method === 'GET') {
-    res.setHeader('Content-type', 'text/html')
-    html= fs.readFileSync(path.join(__dirname, '../fontend/views/login.html'));
-    res.end(html)
-    return
-  }
+  // if (req.path='/' && req.method === 'GET') {
+  //   res.setHeader('Content-type', 'text/html')
+  //   html= fs.readFileSync(path.join(__dirname, '../fontend/views/login.html'));
+  //   res.end(html)
+  //   return
+  // }
 
 
   res.setHeader('Content-type', 'application/json')
   req.path = req.url.split('?')[0]
   req.query = querystring.parse(req.url.split('?')[1])
+
+  req.cookie = {}
+  const cookieStr = req.headers.cookie || ''
+  cookieStr.split(';').forEach(item => {
+    if (!item) {
+      return
+    }
+    const arr = item.split('=')
+    const key = arr[0]
+    const val = arr[1]
+    req.cookie[key] = val
+  })
+
 
   getPostData(req).then(postData => {
     req.body = postData
@@ -54,15 +67,16 @@ const serverHandle = (req, res) => {
       blogPro.then(data => {
         res.end(JSON.stringify(data))
       })
+      console.log(req.headers)
       return
     }
     
 
     const userData = handleUserRouter(req, res)
     if (userData) {
-      res.end(
-        JSON.stringify(userData)
-      )
+      userData.then(data => {
+        res.end(JSON.stringify(data))
+      })
       return
     }
 

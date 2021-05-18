@@ -15,15 +15,30 @@ const getDetail = (id) => {
 }
 
 const newBlog = (blogData = {}) => {
-  return {
-    id: 3
-  }
+  const {title, content, author} = blogData
+  const createTime = Date.now()
+
+  const sql = `insert into blog (title, content, createtime, author)
+    values ('${title}', '${content}', '${createTime}', '${author}')`
+
+  return exec(sql).then(insertData => {
+    console.log('insertData is', insertData)
+    return insertData.insertId
+  })
 }
-const updateBlog = (blogData = {}) => {
-  return true
+const updateBlog = (id, blogData = {}) => {
+  const {title, content} = blogData
+  const sql = `update blog set title='${title}', content='${content}' where id = ${id}`
+
+  return exec(sql).then(update => {
+    return update
+  })
 }
-const delBlog = (blogData = {}) => {
-  return true
+const delBlog = (id, author) => {
+  const sql = `delete from blog where id = ${id}`
+  return exec(sql).then(deleteData => {
+    return deleteData
+  })
 }
 
 module.exports = {
