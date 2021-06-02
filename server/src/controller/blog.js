@@ -22,7 +22,6 @@ const newBlog = (blogData = {}) => {
     values ('${title}', '${content}', '${createTime}', '${author}')`
 
   return exec(sql).then(insertData => {
-    console.log('insertData is', insertData)
     return insertData.insertId
   })
 }
