@@ -6,39 +6,36 @@ const handleBlogRouter = (req, res) => {
 
   // 获取接口
   if (method === 'GET') {
-    let msg
     switch(req.path) {
       case '/api/blog/list' :
-        msg = new SuccessModel(getList(req.query.author))
-        break
+        return getList(req.query.author, req.query.keyword).then(data => {
+          return new SuccessModel(data)
+        })
       case '/api/blog/detail' :
-        msg = new SuccessModel(getDetail(req.query.author))
-        break  
+        return getDetail(req.query.id).then(data => {
+          return new SuccessModel(data)
+        }) 
     }
-    return msg
   }
   if (method === 'POST') {
-    let msg
+    let msg,data
     switch(req.path) {
       case '/api/blog/new' :
-        msg = new SuccessModel(newBlog(req.body))
+        req.body.author = 'zhangsan'
+        return newBlog(req.body).then(data => {
+          return new SuccessModel(data)
+        })
         break
       case '/api/blog/update':
-        const data = updateBlog(req.body)
-        if (data) {
-          msg = new SuccessModel(data)
-        } else {
-          msg = new ErrorModel(data)
-        }
+        return updateBlog(5, req.body).then(data => {
+          return data ? new SuccessModel(data) : new ErrorModel(data)
+        })
         break  
       case '/api/blog/delete':
-          const data = delBlog(req.body)
-          if (data) {
-            msg = new SuccessModel(data)
-          } else {
-            msg = new ErrorModel(data)
-          }
-        break  
+        return delBlog(3, 'zhao').then(data => {
+          return data ? new SuccessModel(data) : new ErrorModel(data)
+        })
+      break  
     }
     return msg
   }

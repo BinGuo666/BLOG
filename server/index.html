@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <title>右键菜单练习</title>
+ <style>
+ *{
+  margin: 0;
+  /*padding: 0;*/
+ }
+ ul{
+  width: 120px;
+  height: 150px;
+  background-color: rgb(204,204,204);
+  font-size: 22px;
+  list-style: none;
+  line-height: 50px;
+  position: fixed;
+  display: none;
+ }
+ li{
+  background-color: rgb(238,238,238);
+  padding-left: 15px;
+ }
+ </style>
+</head>
+<body>
+<ul id="ul">
+ <li>复制</li>
+ <li>剪切</li>
+ <li>粘贴</li>
+</ul>
+<script>
+ //给document 添加 oncontextmenu 事件 取消默认的右键菜单的行为。
+ //点击右键的时候，获得点击的位置。
+ var ul = document.getElementById('ul');
+ document.oncontextmenu=function(e){
+ e=e||window.event;
+ //屏蔽样式
+ e.preventDefault?e.preventDefault():(e.returnValue=false);
+ //获取坐标
+ var x=e.clientX;//视口的位置
+ var y=e.clientY;
+ 
+ //显示菜单
+ ul.style.display='block';
+ ul.style.top=y+'px';
+ ul.style.left=x+'px';
+ };
+ //点击左键 自定义菜单消失
+ document.onclick=function () {
+ ul.style.display='none';
+ };
+ //给每个li添加 鼠标进入(onmouseover)和鼠标离开(onmouseout)的事件
+ var lis = document.querySelectorAll('li');
+ for (let i = 0; i < lis.length; i++) {
+ lis[i].onmouseover=function () {
+  lis[i].style.backgroundColor='rgb(204,204,204)';
+ };
+ lis[i].onmouseout=function () {
+  lis[i].style.backgroundColor='rgb(238,238,238)';
+ }
+ }
+ 
+</script>
+</body>
+</html>
