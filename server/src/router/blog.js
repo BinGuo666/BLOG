@@ -11,7 +11,7 @@ const handleBlogRouter = (req, res) => {
   const method = req.method // GET POST
 
   // 获取接口
-  if (method === 'POST') {
+  if (method === 'GET') {
     switch(req.path) {
       case '/api/blog/list' :
         return getList(req.query.author, req.query.keyword).then(data => {
