@@ -34,7 +34,7 @@ const updateBlog = (id, blogData = {}) => {
   })
 }
 const delBlog = (id, author) => {
-  const sql = `delete from blog where id = ${id}`
+  const sql = `delete from blog where id = ${id} and author = '${author}'`
   return exec(sql).then(deleteData => {
     return deleteData
   })
