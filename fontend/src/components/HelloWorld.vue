@@ -1,70 +1,175 @@
 <template>
-  <h1>{{ msg }}</h1>
-
-  <p>
-    Recommended IDE setup:
-    <a href="https://code.visualstudio.com/" target="_blank">VSCode</a>
-    +
-    <a
-      href="https://marketplace.visualstudio.com/items?itemName=octref.vetur"
-      target="_blank"
-    >
-      Vetur
-    </a>
-    or
-    <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
-    (if using
-    <code>&lt;script setup&gt;</code>)
-  </p>
-
-  <p>See <code>README.md</code> for more information.</p>
-
-  <p>
-    <a href="https://vitejs.dev/guide/features.html" target="_blank">
-      Vite Docs
-    </a>
-    |
-    <a href="https://v3.vuejs.org/" target="_blank">Vue 3 Docs</a>
-  </p>
-
-  <button @click="count++">count is: {{ count }}</button>
-  <p>
-    Edit
-    <code>components/HelloWorld.vue</code> to test hot module replacement.
-  </p>
+  <div>
+    <div class="buttons">
+        <button class="switch-button">Next</button>
+    </div>
+    <canvas id="canvas"></canvas>
+  </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent } from 'vue'
-export default defineComponent({
-  name: 'HelloWorld',
-  props: {
-    msg: {
-      type: String,
-      required: true
-    }
-  },
-  setup: () => {
-    const count = ref(0)
-    return { count }
-  }
+<script setup>
+import { defineProps, reactive } from 'vue'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+ import * as THREE from 'three'
+
+defineProps({
+  msg: String,
 })
+
+const state = reactive({ count: 0 })
+
+class App {
+    constructor(canvas, model, animations) {
+        this.scene = App.createScene()
+            .add(model)
+            .add(App.createAmbientLight())
+            .add(App.createDirectionalLight());
+        this.camera = App.createCamera();
+        this.renderer = App.createRenderer(canvas);
+        this.mixer = new AnimationMixer(model, animations);
+        this.update();
+    }
+
+    static createScene() {
+        let scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x336495);
+        return scene;
+    }
+
+    static createAmbientLight() {
+        return new THREE.AmbientLight(0xffffff, 1);
+    }
+
+    static createDirectionalLight() {
+        let light = new THREE.DirectionalLight(0xffffff, 2);
+        light.position.set(0, 400, 350);
+        return light;
+    }
+
+    static createCamera() {
+        let camera = new THREE.PerspectiveCamera(
+            50,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.z = 10;
+        camera.position.x = 0;
+        camera.position.y = -3;
+        return camera;
+    }
+
+    static createRenderer(canvas) {
+        let renderer = new THREE.WebGLRenderer({ canvas });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.toneMappingExposure = 2.0;
+        return renderer;
+    }
+
+    resize() {
+        let canvasSize = this.renderer.getSize(new THREE.Vector2());
+        let windowSize = new THREE.Vector2(window.innerWidth, window.innerHeight);
+        if (!canvasSize.equals(windowSize)) {
+            this.renderer.setSize(windowSize.x, windowSize.y, false);
+            this.camera.aspect = windowSize.x / windowSize.y;
+            this.camera.updateProjectionMatrix();
+        }
+    }
+
+    update() {
+        this.resize();
+        this.mixer.update();
+        this.renderer.render(this.scene, this.camera);
+        window.requestAnimationFrame(() => { this.update() });
+    }
+}
+
+class AnimationMixer {
+    constructor(model, animations) {
+        this.clock = new THREE.Clock();
+        this.mixer = new THREE.AnimationMixer(model);
+        this.animations = animations;
+    }
+
+    play(clip) {
+        let animation = this.animations.find(a => a.name === clip);
+        if (animation) {
+            this.mixer.stopAllAction();
+            this.mixer.clipAction(animation).play();
+            this.clip = clip;
+        }
+    }
+
+    update() {
+        let delta = this.clock.getDelta();
+        this.mixer.update(delta);
+    }
+}
+
+// load model and start app
+let loader = new GLTFLoader();
+loader.load('/multi.glb',
+    function (gltf) {
+        let model = gltf.scene;
+        model.scale.set(10, 10, 10);
+        model.position.y = -6;
+
+        let canvas = document.querySelector('#canvas');
+        const app = new App(canvas, model, gltf.animations);
+
+        app.mixer.play('CatWalk');
+        document.querySelector(".switch-button").addEventListener("click", () => {
+            const clips = [
+                'CatWalk',
+                'Samba',
+                'Belly',
+            ]
+            let clipIndex = clips.indexOf(app.mixer.clip);
+            clipIndex = (clipIndex + 1) % clips.length;
+            app.mixer.play(clips[clipIndex]);
+        });
+    },
+    undefined,
+    function (error) {
+        console.error(error);
+    }
+);
+
+
+
+
 </script>
 
 <style scoped>
-a {
-  color: #42b983;
+body {
+    background-color: #252423;
 }
 
-label {
-  margin: 0 0.5em;
-  font-weight: bold;
+#canvas {
+    width: 100%;
 }
 
-code {
-  background-color: #eee;
-  padding: 2px 4px;
-  border-radius: 4px;
-  color: #304455;
+.buttons {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.switch-button {
+    padding: 0.25em;
+    border-radius: 4px;
+    border: none;
+    width: 4em;
+    height: 2em;
+    background-color: #0069ed;
+    color: white;
+    text-align: center;
 }
 </style>
